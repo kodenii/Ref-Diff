@@ -1,0 +1,79 @@
+MODEL:
+  sam_ckpt: checkpoints/sam_vit_h_4b8939.pth
+  sam_type: vit_h
+  clip_type: ViT-B/16
+  diffusion_config: configs/stable-diffusion/v1.yaml
+  diffusion_ckpt: checkpoints/v1-5-pruned.ckpt
+  diffusion_strength: 0.1
+  diffusion_step: 20
+  diffusion_scale: 9.0
+  diffusion_eta: 0.0
+  diffusion_prompt_pos: 
+  diffusion_prompt_neg: 
+TRAIN:
+  # Base Arch
+  input_size: 416
+  word_len: 17
+  word_dim: 1024
+  vis_dim: 512
+  fpn_in: [512, 1024, 1024]
+  fpn_out: [256, 512, 1024]
+  sync_bn: True
+  # Decoder
+  num_layers: 3
+  num_head: 8
+  dim_ffn: 2048
+  dropout: 0.1
+  intermediate: False
+  # Training Setting
+  workers: 1  # data loader workers
+  workers_val: 1
+  epochs: 50
+  milestones: [35]
+  start_epoch: 0
+  batch_size: 1  # batch size for training
+  batch_size_val: 1  # batch size for validation during training, memory and speed tradeoff
+  base_lr: 0.0001
+  lr_decay: 0.1
+  lr_multi: 0.1
+  weight_decay: 0.
+  max_norm: 0.
+  manual_seed: 0
+  print_freq: 100
+  # Resume & Save
+  save_freq: 1
+  weight:  # path to initial weight (default: none)
+  resume:  # path to latest checkpoint (default: none)
+  evaluate: True  # evaluate on validation set, extra gpu memory needed and small batch_size_val is recommend
+Distributed:
+  dist_url: tcp://localhost:3681
+  dist_backend: 'nccl'
+  multiprocessing_distributed: True
+  world_size: 1
+  rank: 0
+HYPER:
+  filter_size_ratio: 0.0
+  filter_size_value: 10000
+  topk: 10 #25
+  hard_text_weight: 1.0
+  hard_core_weight: 0.0
+  soft_text_weight: 0.5
+  soft_core_weight: 0.5
+  hard_weight: 0.7
+  soft_weight: 0.3
+  diff_weight: 0.05
+  diffusion_pad: True
+  diffusion_pad_value: 0
+  diffusion_image_size: 1024
+TEST:
+  exp_name: SAM_CLIP_SD_VIS_GEN
+  output_folder: ./exp/refcoco
+  dataset: refcoco+
+  mask_root: ./datasets/masks/refcoco+
+  test_split: val-test
+  test_lmdb: ./datasets/lmdb/refcoco+/val.lmdb
+  max_sample: #1000
+  use_cache: [proposal, text, attn, soft, hard]
+  overwrite_cache: []
+  cache_dir: ./cache
+  visualize: False
